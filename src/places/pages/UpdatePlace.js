@@ -15,6 +15,7 @@ import './PlaceForm.css';
 
 import { useHtttpClient } from '../../shared/hooks/http-hook';
 import { AuthContext } from '../../shared/context/auth-context';
+import ImageUpload from '../../shared/component/FormElements/ImageUploads';
 
 
 const UpdatePlace = () => {
@@ -33,6 +34,14 @@ const UpdatePlace = () => {
       description: {
         value: '',
         isValid: false
+      },
+      image: {
+        value: null,
+        isValid: false
+      },
+      address: {
+        value: '',
+        isValid: false
       }
     },
     false
@@ -42,7 +51,7 @@ const UpdatePlace = () => {
     const fetchPlaces = async () => {
       try {
         const responseData = await sendRequest(
-          `http://localhost:5000/api/places/${placeId}`
+          process.env.REACT_APP_BACKEND_URL+`/places/${placeId}`
         );
         setLoadedPlace(responseData.place);
 
@@ -54,6 +63,14 @@ const UpdatePlace = () => {
             },
             description: {
               value: responseData.place.description,
+              isValid: true
+            },
+            image: {
+              value: responseData.place.image,
+              isValid: true
+            },
+            address: {
+              value: responseData.place.address,
               isValid: true
             }
           },
@@ -70,17 +87,17 @@ const UpdatePlace = () => {
   const placeUpdateSubmitHandler = async event => {
     event.preventDefault();
     try{
+      const formData = new FormData();
+        formData.append('title', formState.inputs.title.value);
+        formData.append('description', formState.inputs.description.value);
+        formData.append('image', formState.inputs.image.value);
+        formData.append('address', formState.inputs.address.value);
+        
       await sendRequest(
-        `http://localhost:5000/api/places/${placeId}`,
+        process.env.REACT_APP_BACKEND_URL+`/places/${placeId}`,
         'PATCH',
-        JSON.stringify({
-          title: formState.inputs.title.value,
-          description: formState.inputs.description.value
-        }),
-        {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer ' + auth.token
-        }
+        formData,
+        {Authorization: 'Bearer ' + auth.token}
       );
       navigate(`/${auth.userId}/places`);
 
@@ -123,6 +140,7 @@ const UpdatePlace = () => {
         initialValue={loadedPlace.title}
         initialValid={true}
       />
+
       <Input
         id="description"
         element="textarea"
@@ -130,9 +148,29 @@ const UpdatePlace = () => {
         validators={[VALIDATOR_MINLENGTH(5)]}
         errorText="Please enter a valid description (min. 5 characters)."
         onInput={inputHandler}
-        initialValue={loadedPlace.title}
+        initialValue={loadedPlace.description}
         initialValid={true}
       />
+
+      <ImageUpload 
+      id="image" 
+      onInput={inputHandler} 
+      errorText='please provide an image'
+      initialImage={process.env.REACT_APP_ASSET_URL+`/${loadedPlace.image}`}
+      />
+
+      <Input
+        id="address" 
+        element="input" 
+        type="text" 
+        label="Address"
+        validators= {[VALIDATOR_REQUIRE()]}
+        errorText="please enter a valid address"
+        onInput={inputHandler}
+        initialValue={loadedPlace.address}
+        initialValid={true}
+        />
+
       <Button type="submit" disabled={!formState.isValid}>
         UPDATE PLACE
       </Button>

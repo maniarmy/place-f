@@ -31,6 +31,13 @@ export const useHtttpClient = () =>{
             return responseData;
     }
     catch(err){
+
+      if (err.name === 'AbortError') {
+        console.log('Request aborted');
+        setIsLoading(false);
+        return;
+    }
+
        setError(err.message);
        setIsLoading(false);
        throw err;

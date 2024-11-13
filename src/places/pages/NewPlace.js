@@ -12,8 +12,6 @@ import LoadingSpinner from '../../shared/component/uiElement/LoadingSpinner';
 import ErrorModal from '../../shared/component/uiElement/ErrorModal';
 import ImageUpload from '../../shared/component/FormElements/ImageUploads';
 
-
-
 const NewPlace = () => {
   const auth = useContext(AuthContext);
   const navigate = useNavigate();
@@ -46,8 +44,9 @@ const NewPlace = () => {
         formData.append('description', formState.inputs.description.value);
         formData.append('address', formState.inputs.address.value);
         formData.append('image', formState.inputs.image.value);
-      await sendRequest(
-        'http://localhost:5000/api/places',
+        
+        await sendRequest(
+        process.env.REACT_APP_BACKEND_URL+'/places',
         'POST',
         formData,
         {Authorization: 'Bearer ' + auth.token}
@@ -60,7 +59,6 @@ const NewPlace = () => {
    
   }
 
-  
   return (
     <>
     <ErrorModal error={error} onClear={clearError}/>
